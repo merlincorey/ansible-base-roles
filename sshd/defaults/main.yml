@@ -1,0 +1,207 @@
+---
+# file: roles/sshd/defaults/main.yml
+
+###
+### SSH configuration defaults are optimized for security based on https://stribika.github.io/2015/01/04/secure-secure-shell.html
+###
+### Some values, commented out below, may be set for the global client configuration but will default to using the server side values if unset
+###
+
+##
+## TODO: Still need to add KeyRegenerationInterval, ServerKeyBits, and RekeyLimit if we will support version 1 protocol
+## TODO: Still need to add RSAAuthentication, AuthorizedPrincipalsFile, and RHosts*
+## TODO: Still need to add all the GSSAPI options, after figuring out what exactly that is
+## TODO: Still need to add AcceptEnv
+##
+
+# Base path of sshd configuration
+sshd_path: /etc/ssh
+
+# Port for sshd to listen on
+sshd_port: 22
+# Address family to use
+sshd_address_family: any
+# Addresses for sshd to listen on
+sshd_listen_addresses:
+  - 0.0.0.0
+  - "::"
+
+# Protocol should nearly always be 2, but for completeness, this variable is here
+sshd_protocol: 2
+
+# Whether or not to delete unused host keys
+sshd_host_keys_keep_unused: False
+# The host authentication key types
+sshd_host_keys:
+  - ed25519
+  - rsa 
+# Whether or not to generate new host keys for keys that are below the proper size
+sshd_host_keys_secure: True
+# Dictionary of host key sizes by name of key type
+sshd_host_keys_sizes:
+  dsa: 1024
+  rsa: 4096
+  ecdsa: 256
+  ed25519: 256  
+  
+# Syslog logging facility
+sshd_syslog_facility: AUTH
+# Syslog Log level (verbosity)
+# QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG, DEBUG1, DEBUG2 and DEBUG3
+# Logging with a DEBUG level violates the privacy of users and is not recommended
+sshd_log_level: INFO
+
+# Server disconnects after this time if the user has not logged in successfully (0 means no limit)
+sshd_login_grace_time: 2m
+# Whether or not to allow "root" to login over SSH
+sshd_permit_root_login: "no"
+# Whether or not to check the file modes and ownership of user's files and home directory before accepting login
+sshd_strict_modes: "yes"
+# Maximum number of authentication attempts permitted per connection
+sshd_max_auth_tries: 6
+# Maximum number of sessions from a user
+sshd_max_sessions: 10
+
+# Whether or not to enable public key authentication
+sshd_pubkey_authentication: "yes"
+#sshd_client_pubkey_authentication: "yes"
+# Where authorized public keys will be stored
+sshd_authorized_keys_file: .ssh/authorized_keys .ssh/authorized_keys2
+# Command to run to generate authorized keys file on demand (i.e. using LDAP as a backend)
+sshd_authorized_keys_command: "none"
+# User to run AuthorizedKeysCommand as
+sshd_authorized_keys_command_user: nobody
+
+# Whether or not to enable password authentication
+sshd_password_authentication: "no"
+#sshd_client_password_authentication: "no"
+# Whether or not to permit empty password logins
+sshd_permit_empty_passwords: "no"
+# Wether or not to allow challenge-response via PAM (set to "yes" if you want to use OTP, Google Authenticator, or similar)
+sshd_challenge_response_authentication: "no"
+#sshd_client_challenge_response_authentication: "no"
+
+# Set to True to enable the kerberos configuration directives
+sshd_kerberos: False
+sshd_kerberos_authentication: "no"
+sshd_kerberos_or_local_passwd: "yes"
+sshd_kerberos_ticket_cleanup: "yes"
+sshd_kerberos_get_afs_token: "no"
+
+# Whether or not to use PAM for session/user checking
+sshd_use_pam: "yes"
+
+# Whether or not to allow ssh-agent forwarding
+sshd_allow_agent_forwarding: "yes"
+# Whether or not to allow TCP forwarding
+sshd_allow_tcp_forwarding: "yes"
+# Whether or not to allow forwarded ports to bind on non-local addresses
+# Values can be "no" for localhost, "yes" for wildcard address, or "clientspecified" to allow client specification
+sshd_gateway_ports: "no"
+# Whether or not to allow x11 forwarding
+sshd_x11_forwarding: "yes"
+# The first display number available for sshd's forwarding
+sshd_x11_display_offset: 10
+# Whether sshd should bind X11 to localhost only or not (only need "no" for certain older clients)
+sshd_x11_use_localhost: "yes"
+# Whether or not pty(4) allocation is permitted
+sshd_permit_tty: "yes"
+# Whether or not to print /etc/motd for interactive logins
+sshd_print_motd: "yes"
+# Whether or not to print last login for interactive logins
+sshd_print_last_log: "yes"
+# Whether or not to send TCP keepalive messages
+sshd_tcp_keep_alive: "yes"
+# Whether or not to use login(1) for interactive login sessions
+# Turning this on disables X11Forwarding because login(1) does not know how to handle xauth(1) cookies
+sshd_use_login: "no"
+# Whether or not sshd should drop privileges by creating unprivileged child processes
+# A value of "sandbox" imposes additional restrictions on the pre-authentication processes
+sshd_use_privilege_separation: sandbox
+# Whether or not ~/.ssh/environment and environment= options in ~/.ssh/authorized_keys are processed by sshd
+# Turning this on enables users to bypass access restrictions through means such as LD_PRELOAD
+sshd_permit_user_environment: "no"
+# Whether or not compression is allowed or just delayed until after the user has authenticated successfully
+# A value of "no" completely disables compression, whilst a value of "yes" completely enables it
+sshd_compression: delayed
+# Timeout interval in seconds after which if no data has been received from the client, sshd will send a message through to request a response
+# A value of 0 indicates that no messages will be sent ever
+sshd_client_alive_interval: 0
+# Maximum number of client alive messages that may be sent without a response before the connection and session are terminated
+sshd_client_alive_count_max: 3
+# Whether or not to look up remote host name and check if the address has a corresponding PTR record
+sshd_use_dns: "yes"
+# Where the sshd PID file is located
+sshd_pid_file: /var/run/sshd.pid
+# The number of concurrent unauthenticated connections available in "start:rate:full" format
+sshd_max_startups: 10:30:100
+# Whether or not to allow forwarding via the tun(4) device
+# Values may be "yes", "point-to-point" (layer 3), "ethernet" (layer 2), or "no".  "yes" implies both "point-to-point" and "ethernet"
+sshd_permit_tunnel: "no"
+# Path to chroot after authentication, or none to not chroot
+sshd_chroot_directory: none
+# String appended to sshd version
+sshd_version_addendum: none
+
+# Path to banner to be displayed to unauthenticated clients or none for no banner
+sshd_banner: none
+
+# Whether or not to disable HPN tuning
+sshd_hpn_disabled: "no"
+# Buffer size for HPN to non-HPN connections
+sshd_hpn_buffer_size: 2048
+# TCP receive socket buffer polling for HPN, disable on non autotuning kernels
+sshd_hpn_tcp_rcv_buf_poll: "yes"
+
+# Whether or not to allow the use of the NONE cipher
+sshd_none_enabled: "no"
+
+# Whether or not to enable the SFTP server subsystem
+sshd_sftp_server: True
+# Path to SFTP server
+sshd_sftp_server_path: /usr/libexec/sftp-server
+
+# List of username patterns to deny access to login through sshd
+# If the pattern takes the form user@host then user and host are separately checked, restricting logins to particular users from particular hosts
+sshd_deny_users: []
+# List of username patterns to allow access to login through sshd
+# If the pattern takes the form user@host then user and host are separately checked, restricting logins to particular users from particular hosts
+sshd_allow_users: []
+# List of groupname patterns to deny access to login through sshd
+sshd_deny_groups: []
+# List of groupname patterns to allow access to login through sshd
+sshd_allow_groups: []
+
+# Whether to use default key exchange, cipher, and message authentication checks or not
+# Setting this value to True will completely ignore any values for sshd_client_host_key_algorithms, sshd_kex_algorithms, sshd_ciphers, and sshd_macs
+sshd_default_security: False
+
+# The client side host key algorithms
+sshd_client_host_key_algorithms: ssh-ed25519-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-rsa-cert-v00@openssh.com,ssh-ed25519,ssh-rsa
+
+# Key exchange algorithms to use at start of connection
+# The two listed here are the most secure at the time of publishing this role
+sshd_kex_algorithms: curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+#sshd_client_kex_algorithms: curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+
+# Cipher algorithms to use during encrypted connections
+# The six listed here are the most secure at the time of publishing this role
+sshd_ciphers: chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+#sshd_client_ciphers: chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+
+# Message Authentication Check algorithms to use for signing messages
+# The eight listed here are the most secure at the time of publishing this role
+sshd_macs: hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-ripemd160-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,hmac-ripemd160,umac-128@openssh.com
+#sshd_client_macs: hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-ripemd160-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,hmac-ripemd160,umac-128@openssh.com
+
+# Set match criteria and rules for the match criteria
+# Criteria types may be All (which matches all criteria), User, Group, Host, LocalAddress, LocalPort, and Address.
+# The match patterns may consist of single entries or comma-separated lists.  Address matches may make use of CIDR
+# Available keywords are AcceptEnv, AllowAgentForwarding, AllowGroups, AllowTcpForwarding, AllowUsers, AuthenticationMethods, AuthorizedKeysCommand, AuthorizedKeysCommandUser, AuthorizedKeysFile, AuthorizedPrincipalsFile, Banner, ChrootDirectory, DenyGroups, DenyUsers, ForceCommand, GatewayPorts, GSSAPIAuthentication, HostbasedAuthentication, HostbasedUsesNameFromPacketOnly, KbdInteractiveAuthentication, KerberosAuthentication, MaxAuthTries, MaxSessions, PasswordAuthentication, PermitEmptyPasswords, PermitOpen, PermitRootLogin, PermitTTY, PermitTunnel, PubkeyAuthentication, RekeyLimit, RhostsRSAAuthentication, RSAAuthentication, X11DisplayOffset, X11Forwarding and X11UseLocalHost.
+# e.g.
+# sshd_matches:
+#   - criteria: User foo Address 10.0.0.0/8
+#     rules:
+#       - AllowAgentForwarding yes
+#       - MaxSessions 20
+sshd_matches: []

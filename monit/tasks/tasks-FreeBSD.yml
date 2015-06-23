@@ -1,0 +1,20 @@
+---
+# file: roles/monit/tasks/tasks-FreeBSD.yml
+
+- name: Install monit packages
+  pkgng: name={{ item }} state=present
+  with_items: monit_packages
+  tags: monit install
+
+- name: Add monit to rc.conf
+  lineinfile: dest=/etc/rc.conf line='monit_enable="YES"'
+  tags: monit configure
+
+- name: Create service configuration path
+  file: path={{ monit_include_path }} state=directory mode=0700
+  tags: monit configure
+
+- name: Copy monit configuration
+  template: src=freebsd.monitrc.j2 dest=/usr/local/etc/monitrc mode=600
+  notify: restart monit
+  tags: monit configure

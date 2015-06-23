@@ -1,0 +1,93 @@
+---
+# file: roles/monit/defaults/main.yml
+
+# Check services at 70 second interval
+monit_daemon: 70
+# Number of seconds to delay the first check, 0 means no delay
+monit_daemon_delay: 0
+
+# 'syslog' or path to file to log
+monit_logfile: syslog
+monit_logfile_facility: log_daemon
+
+# Path to monit PID file, empty uses default
+monit_pidfile: ""
+# Path to monit ID file, empty uses default
+monit_idfile: ""
+# Path to monit state file, empty uses default
+monit_statefile: ""
+
+# List of mailservers for monit to use in order of precedence and optional port specifiers
+# Encryption may be one of SSLAUTO, SSLV2, SSLV3, TLSV1, TLSV11, TLSV12, or nothing
+# e.g. The following structure only requires the hostname to be defined
+# monit_mailservers:
+#   - hostname: localhost
+#     port: 25
+#     username: monit
+#     password: tinom
+#     encryption: SSLAUTO 
+monit_mailservers: []
+# Mail server timeout in seconds
+monit_mailservers_timeout: 30
+
+# If this path is set, events that are unable to be mailed will be queued as long as the filesystem has space
+monit_eventqueue_basedir: ""
+# If this value is set, events are queued until the number of slots given are filled
+monit_eventqueue_slots: ""
+
+# URL to M/Monit collector
+monit_mmonit_url: ""
+# If true, credentials aren't registered for M/Monit to connect back to monit
+monit_mmonit_without_credentials: False
+
+# Reformatting the mail message
+monit_mail_format_from: "monit@$HOST"
+monit_mail_format_reply_to: "monit@$HOST"
+monit_mail_format_subject: "monit alert -- $EVENT $SERVICE"
+monit_mail_format_message: |
+  $EVENT Service $SERVICE
+      Date: $DATE
+      Action: $ACTION
+      Host: $HOST
+      Description: $DESCRIPTION
+      
+  Your faithful employee
+  Monit
+
+# Email address to send alerts to, empty means none
+monit_alert: ""
+
+# Set alert lines which include on / not on specialization
+# e.g. "your-name@your.domain not on { instance, action }"
+monit_alerts: []
+
+# Port for monit HTTP management daemon
+monit_httpd_port: 2812
+# Address to bind monit HTTP management daemon
+monit_httpd_use_address: localhost
+# Hosts and users to allow access to monit HTTP management daemon
+monit_httpd_allow:
+  - localhost
+  - admin:monit
+  - "@monit"
+  - "@users readonly"
+
+# List of patterns (directory and glob) to include for monit configuration
+# e.g. "/srv/etc/monit/*.live"
+monit_includes: []
+
+# If this is True, the global include directory is cleared of content before checks files get created
+monit_clean_checks: False
+
+# List of checks to put into checkfiles in global monit_include_path (which is set per OS)
+# e.g. The following structure only requires name and type; service is optional and takes precedence of name; data is a list of strings following the check line
+# monit_checks:
+#   - name: system
+#     service: "$host"
+#     type: system
+#   - name: rootfs
+#     type: device
+#     with: path /
+#     data:
+#       - if space usage > 90% then alert
+monit_checks: []

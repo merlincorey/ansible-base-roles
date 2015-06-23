@@ -1,0 +1,8 @@
+---
+# file: roles/monit/vars/FreeBSD.yml
+
+monit_include_path: /usr/local/etc/monit.d
+
+__monit_packages:
+  - monit
+  

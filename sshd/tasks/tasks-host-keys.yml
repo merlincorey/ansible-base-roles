@@ -1,0 +1,64 @@
+---
+# file: roles/sshd/tasks/tasks-host-keys.yml
+
+- name: Check for unused ssh host keys
+  shell: ls {{ sshd_path }}/ssh_host_*key* | grep -vE "{{ sshd_host_keys|join('|') }}" | wc -l | awk '$1 > 0'
+  register: host_keys_unused
+  when: not sshd_host_keys_keep_unused
+  changed_when: host_keys_unused.stdout
+  tags: sshd secure keys
+
+- name: Delete unused ssh host keys
+  shell: ls {{ sshd_path }}/ssh_host_*key* | grep -vE "{{ sshd_host_keys|join('|') }}" | xargs rm
+  when: not sshd_host_keys_keep_unused and host_keys_unused.stdout
+  tags: sshd secure keys
+
+- name: Check if dsa key needs to be regenerated
+  shell: ssh-keygen -lf {{ sshd_path }}/ssh_host_dsa_key | awk '$1 != {{ sshd_host_keys_sizes.dsa }}' | wc -l | awk '$1 > 0'
+  register: host_keys_dsa
+  when: sshd_host_keys_secure and 'dsa' in sshd_host_keys
+  changed_when: host_keys_dsa.stdout
+  tags: sshd secure keys
+
+- name: Generate dsa key
+  shell: yes | ssh-keygen -t dsa -f {{ sshd_path }}/ssh_host_dsa_key -N ''
+  when: sshd_host_keys_secure and 'dsa' in sshd_host_keys and host_keys_dsa.stdout
+  tags: sshd secure keys
+
+- name: Check if rsa key needs to be regenerated
+  shell: ssh-keygen -lf {{ sshd_path }}/ssh_host_rsa_key | awk '$1 < {{ sshd_host_keys_sizes.rsa }}' | wc -l | awk '$1 > 0'
+  register: host_keys_rsa
+  when: sshd_host_keys_secure and 'rsa' in sshd_host_keys
+  changed_when: host_keys_rsa.stdout
+  tags: sshd secure keys
+
+- name: Generate rsa key
+  shell: yes | ssh-keygen -t rsa -b {{ sshd_host_keys_sizes.rsa }} -f {{ sshd_path }}/ssh_host_rsa_key -N ''
+  when: sshd_host_keys_secure and 'rsa' in sshd_host_keys and host_keys_rsa.stdout
+  tags: sshd secure keys
+
+- name: Check if ecdsa key needs to be regenerated
+  shell: ssh-keygen -lf {{ sshd_path }}/ssh_host_ecdsa_key | awk '$1 != {{ sshd_host_keys_sizes.ecdsa }}' | wc -l | awk '$1 > 0'
+  register: host_keys_ecdsa
+  when: sshd_host_keys_secure and 'ecdsa' in sshd_host_keys
+  changed_when: host_keys_ecdsa.stdout
+  tags: sshd secure keys
+
+- name: Generate ecdsa key
+  shell: yes | ssh-keygen -t ecdsa -b {{ sshd_host_keys_sizes.rsa }} -f {{ sshd_path }}/ssh_host_ecdsa_key -N ''
+  when: sshd_host_keys_secure and 'ecdsa' in sshd_host_keys and host_keys_ecdsa.stdout
+  tags: sshd secure keys
+
+- name: Check if ed25519 key needs to be regenerated
+  shell: ssh-keygen -lf {{ sshd_path }}/ssh_host_ed25519_key | awk '$1 != {{ sshd_host_keys_sizes.ed25519 }}' | wc -l | awk '$1 > 0'
+  register: host_keys_ed25519
+  when: sshd_host_keys_secure and 'ed25519' in sshd_host_keys
+  changed_when: host_keys_ed25519.stdout
+  tags: sshd secure keys
+
+- name: Generate ed25519 key
+  shell: yes | ssh-keygen -t ed25519 -f {{ sshd_path }}/ssh_host_ed25519_key -N ''
+  when: sshd_host_keys_secure and 'ed25519' in sshd_host_keys and host_keys_ed25519.stdout
+  tags: sshd secure keys
+
+  

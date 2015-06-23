@@ -1,0 +1,10 @@
+check {{ item.type }} {{ item.service|default(item.name) }}
+{%- if item.with is defined and item.with %}
+ with {{ item.with }}
+{% endif %}
+{% if item.data is defined and item.data|length %}
+{% for line in item.data %}
+  {{ line }}
+{% endfor %}
+{% endif %}
+

@@ -1,0 +1,14 @@
+---
+# file: roles/sshd/meta/main.yml
+
+galaxy_info:
+  author: "Merlin Corey"
+  company: merlinsbox.net
+  license: license (BSD)
+  min_ansible_version: 1.9 (or higher)
+  platforms:
+    - FreeBSD 10.1
+    - Debian 8.1
+    - CentOS 7.1
+  categories: []
+dependencies: []

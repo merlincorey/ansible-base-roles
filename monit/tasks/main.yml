@@ -1,0 +1,39 @@
+---
+# file: roles/monit/tasks/main.yml
+
+- name: Include OS-specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags: monit
+
+- name: Define monit_packages
+  set_fact:
+    monit_packages: "{{ __monit_packages|list }}"
+  when: monit_packages is not defined
+  tags: monit
+
+- include: tasks-FreeBSD.yml
+  when: ansible_os_family == 'FreeBSD'
+  tags: monit
+
+- include: tasks-Debian.yml
+  when: ansible_os_family == 'Debian'
+  tags: monit
+
+- include: tasks-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+  tags: monit
+
+- name: Check for extraneous checks in monit_include_path
+  debug: msg="TODO Need to make this work so that monit_clean_checks does not result in changes when nothing has changed"
+  tags: monit configure
+  
+#- name: Clear check files in monit_include_path
+#  shell: rm -f {{ monit_include_path }}/*
+#  when: monit_clean_checks and monit_ls_checks
+#  tags: monit configure
+
+- name: Write check files to monit_include_path
+  template: src=check.j2 dest={{ monit_include_path }}/{{ item.name }}
+  with_items: monit_checks
+  notify: restart monit
+  tags: monit configure

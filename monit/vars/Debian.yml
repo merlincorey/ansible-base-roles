@@ -1,0 +1,13 @@
+---
+# file: roles/monit/vars/Debian.yml
+
+monit_logfile: /var/log/monit.log
+monit_logfile_facility: ""
+monit_idfile: /var/lib/monit/id
+monit_statefile: /var/lib/monit/state
+monit_eventqueue_basedir: /var/lib/monit/events
+monit_eventqueue_slots: "100"
+monit_include_path: /etc/monit/conf.d
+
+__monit_packages:
+  - monit

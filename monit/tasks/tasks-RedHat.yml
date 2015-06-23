@@ -1,0 +1,23 @@
+---
+# file: roles/monit/tasks/tasks-RedHat.yml
+
+- name: Install epel-release
+  yum: name=epel-release state=installed update_cache=yes
+  tags: monit install
+  
+- name: Install monit packages
+  yum: name={{ item }} state=installed update_cache=yes
+  with_items: monit_packages
+  tags: monit install
+
+- name: Enable monit as a system service
+  shell: systemctl enable monit.service
+  register: monit_systemctl
+  changed_when: monit_systemctl.stdout
+  tags: monit install
+
+- name: Copy monit configuration
+  template: src=centos.monitrc.j2 dest=/etc/monitrc mode=600
+  notify: restart monit
+  tags: monit configure
+  

@@ -1,0 +1,259 @@
+#	$OpenBSD: sshd_config,v 1.93 2014/01/10 05:59:19 djm Exp $
+#	$FreeBSD: releng/10.1/crypto/openssh/sshd_config 264692 2014-04-20 12:46:18Z des $
+
+# This is the sshd server system-wide configuration file.  See
+# sshd_config(5) for more information.
+
+# This sshd was compiled with PATH=/usr/bin:/bin:/usr/sbin:/sbin
+
+# The strategy used for options in the default sshd_config shipped with
+# OpenSSH is to specify options with their default value where
+# possible, but leave them commented.  Uncommented options override the
+# default value.
+
+# Note that some of FreeBSD's defaults differ from OpenBSD's, and
+# FreeBSD has a few additional options.
+
+#Port 22
+#AddressFamily any
+#ListenAddress 0.0.0.0
+#ListenAddress ::
+
+Port {{ sshd_port }}
+AddressFamily {{ sshd_address_family }}
+{% for address in sshd_listen_addresses: %}
+ListenAddress {{ address }}
+{% endfor %}
+
+# The default requires explicit activation of protocol 1
+#Protocol 2
+
+# HostKey for protocol version 1
+#HostKey /etc/ssh/ssh_host_key
+# HostKeys for protocol version 2
+#HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_dsa_key
+#HostKey /etc/ssh/ssh_host_ecdsa_key
+#HostKey /etc/ssh/ssh_host_ed25519_key
+
+Protocol {{ sshd_protocol }}
+{% for key in sshd_host_keys %}
+HostKey {{ sshd_path }}/ssh_host_{{ key }}_key
+{% endfor %}
+
+# Lifetime and size of ephemeral version 1 server key
+#KeyRegenerationInterval 1h
+#ServerKeyBits 1024
+
+# Ciphers and keying
+#RekeyLimit default none
+
+# Logging
+# obsoletes QuietMode and FascistLogging
+#SyslogFacility AUTH
+#LogLevel INFO
+
+SyslogFacility {{ sshd_syslog_facility }}
+LogLevel {{ sshd_log_level }}
+
+# Authentication:
+
+#LoginGraceTime 2m
+#PermitRootLogin no
+#StrictModes yes
+#MaxAuthTries 6
+#MaxSessions 10
+
+LoginGraceTime {{ sshd_login_grace_time }}
+PermitRootLogin {{ sshd_permit_root_login }}
+StrictModes {{ sshd_strict_modes }}
+MaxAuthTries {{ sshd_max_auth_tries }} 
+MaxSessions {{ sshd_max_sessions }}
+
+#RSAAuthentication yes
+#PubkeyAuthentication yes
+
+PubkeyAuthentication {{ sshd_pubkey_authentication }}
+
+# The default is to check both .ssh/authorized_keys and .ssh/authorized_keys2
+#AuthorizedKeysFile .ssh/authorized_keys .ssh/authorized_keys2
+
+#AuthorizedPrincipalsFile none
+
+#AuthorizedKeysCommand none
+#AuthorizedKeysCommandUser nobody
+
+AuthorizedKeysFile {{ sshd_authorized_keys_file }}
+AuthorizedKeysCommand {{ sshd_authorized_keys_command }}
+AuthorizedKeysCommandUser {{ sshd_authorized_keys_command_user }}
+
+# For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+#RhostsRSAAuthentication no
+# similar for protocol version 2
+#HostbasedAuthentication no
+# Change to yes if you don't trust ~/.ssh/known_hosts for
+# RhostsRSAAuthentication and HostbasedAuthentication
+#IgnoreUserKnownHosts no
+# Don't read the user's ~/.rhosts and ~/.shosts files
+#IgnoreRhosts yes
+
+# Change to yes to enable built-in password authentication.
+#PasswordAuthentication no
+#PermitEmptyPasswords no
+
+PasswordAuthentication {{ sshd_password_authentication }}
+PermitEmptyPasswords {{ sshd_permit_empty_passwords }}
+
+# Change to no to disable PAM authentication
+#ChallengeResponseAuthentication yes
+
+ChallengeResponseAuthentication {{ sshd_challenge_response_authentication }}
+
+# Kerberos options
+#KerberosAuthentication no
+#KerberosOrLocalPasswd yes
+#KerberosTicketCleanup yes
+#KerberosGetAFSToken no
+
+{% if sshd_kerberos is defined and sshd_kerberos %}
+KerberosAuthentication {{ sshd_kerberos_authentication }}
+KerberosOrLocalPasswd {{ sshd_kerberos_or_local_passwd }}
+KerberosTicketCleanup {{ sshd_kerberos_ticket_cleanup }}
+KerberosGetAFSToken {{ sshd_kerberos_get_afs_token }}
+{% endif %}
+
+# GSSAPI options
+#GSSAPIAuthentication no
+#GSSAPICleanupCredentials yes
+
+# Set this to 'no' to disable PAM authentication, account processing,
+# and session processing. If this is enabled, PAM authentication will
+# be allowed through the ChallengeResponseAuthentication and
+# PasswordAuthentication.  Depending on your PAM configuration,
+# PAM authentication via ChallengeResponseAuthentication may bypass
+# the setting of "PermitRootLogin without-password".
+# If you just want the PAM account and session checks to run without
+# PAM authentication, then enable this but set PasswordAuthentication
+# and ChallengeResponseAuthentication to 'no'.
+#UsePAM yes
+
+UsePAM {{ sshd_use_pam }}
+
+#AllowAgentForwarding yes
+#AllowTcpForwarding yes
+#GatewayPorts no
+#X11Forwarding yes
+#X11DisplayOffset 10
+#X11UseLocalhost yes
+#PermitTTY yes
+#PrintMotd yes
+#PrintLastLog yes
+#TCPKeepAlive yes
+#UseLogin no
+#UsePrivilegeSeparation sandbox
+#PermitUserEnvironment no
+#Compression delayed
+#ClientAliveInterval 0
+#ClientAliveCountMax 3
+#UseDNS yes
+#PidFile /var/run/sshd.pid
+#MaxStartups 10:30:100
+#PermitTunnel no
+#ChrootDirectory none
+#VersionAddendum FreeBSD-20140420
+
+AllowAgentForwarding {{ sshd_allow_agent_forwarding }}
+AllowTcpForwarding {{ sshd_allow_tcp_forwarding }}
+GatewayPorts {{ sshd_gateway_ports }}
+X11Forwarding {{ sshd_x11_forwarding }}
+X11DisplayOffset {{ sshd_x11_display_offset }}
+X11UseLocalhost {{ sshd_x11_use_localhost }}
+PermitTTY {{ sshd_permit_tty }}
+PrintMotd {{ sshd_print_motd }}
+PrintLastLog {{ sshd_print_last_log }}
+TCPKeepAlive {{ sshd_tcp_keep_alive }}
+UseLogin {{ sshd_use_login }}
+UsePrivilegeSeparation {{ sshd_use_privilege_separation }}
+PermitUserEnvironment {{ sshd_permit_user_environment }}
+Compression {{ sshd_compression }}
+ClientAliveInterval {{ sshd_client_alive_interval }}
+ClientAliveCountMax {{ sshd_client_alive_count_max }}
+UseDNS {{ sshd_use_dns }}
+PidFile {{ sshd_pid_file }}
+MaxStartups {{ sshd_max_startups }}
+PermitTunnel {{ sshd_permit_tunnel }}
+ChrootDirectory {{ sshd_chroot_directory }}
+VersionAddendum {{ sshd_version_addendum }}
+
+# no default banner path
+#Banner none
+
+Banner {{ sshd_banner }}
+
+{% if sshd_sftp_server is defined and sshd_sftp_server %}
+# override default of no subsystems
+Subsystem	sftp	{{ sshd_sftp_server_path }}
+{% endif %}
+
+# Disable HPN tuning improvements.
+#HPNDisabled no
+
+# Buffer size for HPN to non-HPN connections.
+#HPNBufferSize 2048
+
+# TCP receive socket buffer polling for HPN.  Disable on non autotuning kernels.
+#TcpRcvBufPoll yes
+
+HPNDisabled {{ sshd_hpn_disabled }}
+HPNBufferSize {{ sshd_hpn_buffer_size }}
+TcpRcvBufPoll {{ sshd_hpn_tcp_rcv_buf_poll }}
+
+# Allow the use of the NONE cipher.
+#NoneEnabled no
+
+{# FreeBSD 10.1 doesn't actually seem to support this directive
+
+NoneEnabled {{ sshd_none_enabled }}
+
+#}
+
+# Example of overriding settings on a per-user basis
+#Match User anoncvs
+#	X11Forwarding no
+#	AllowTcpForwarding no
+#	PermitTTY no
+#	ForceCommand cvs server
+
+{% if sshd_deny_users|length %}
+DenyUsers {{ sshd_deny_users|join(' ') }}
+{% endif %}
+{% if sshd_allow_users|length %}
+AllowUsers {{ sshd_allow_users|join(' ') }}
+{% endif %}
+{% if sshd_deny_groups|length %}
+DenyGroups {{ sshd_deny_groups|join(' ') }}
+{% endif %}
+{% if sshd_allow_groups|length %}
+AllowGroups {{ sshd_allow_groups|join(' ') }}
+{% endif %}
+
+{% if not sshd_default_security %}
+{% if sshd_kex_algorithms %}
+KexAlgorithms {{ sshd_kex_algorithms }}
+{% endif %}
+{% if sshd_kex_algorithms %}
+Ciphers {{ sshd_ciphers }}
+{% endif %}
+{% if sshd_kex_algorithms %}
+MACs {{ sshd_macs }}
+{% endif %}
+{% endif %}
+
+{% if sshd_matches|length %}
+{% for match in sshd_matches %}
+Match {{ match.criteria }}
+{% for rule in match.rules %}
+   {{ rule }}
+{% endfor %}
+{% endfor %}
+{% endif %}

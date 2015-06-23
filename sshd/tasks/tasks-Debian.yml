@@ -1,0 +1,11 @@
+---
+# file: roles/sshd/tasks/tasks-Debian.yml
+
+- name: Copy sshd configuration
+  template: src=debian.sshd_config.j2 dest={{ sshd_path }}/sshd_config mode=600
+  notify: restart sshd
+  tags: sshd configure
+
+- name: Copy global ssh configuration
+  template: src=debian.ssh_config.j2 dest={{ sshd_path }}/ssh_config mode=600
+  tags: sshd configure

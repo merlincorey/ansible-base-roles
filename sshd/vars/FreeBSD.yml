@@ -1,0 +1,6 @@
+---
+# file: roles/sshd/vars/FreeBSD.yml
+
+sshd_service: sshd
+sshd_sftp_server_path: /usr/libexec/sftp-server
+sshd_version_addendum: FreeBSD-20140420

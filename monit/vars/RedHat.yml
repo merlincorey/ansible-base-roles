@@ -1,0 +1,7 @@
+---
+# file: roles/monit/vars/RedHat.yml
+
+monit_include_path: /etc/monit.d
+
+__monit_packages:
+  - monit

@@ -1,0 +1,7 @@
+---
+# file: roles/sshd/vars/RedHat.yml
+
+sshd_service: sshd
+sshd_syslog_facility: AUTHPRIV
+sshd_sftp_server_path: /usr/libexec/openssh/sftp-server
+sshd_version_addendum: none

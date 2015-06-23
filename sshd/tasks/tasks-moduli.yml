@@ -1,0 +1,34 @@
+---
+# file: roles/sshd/tasks/tasks-moduli.yml
+
+- name: Check for existence of moduli file
+  stat: path={{ sshd_path }}/moduli
+  register: moduli_file
+  tags: sshd secure moduli
+
+- name: Create moduli.all
+  command: ssh-keygen -G {{ sshd_path }}/moduli.all -b 4096
+  when: moduli_file.stat.exists == False
+  tags: sshd secure moduli
+
+- name: Create safe moduli file
+  command: ssh-keygen -T {{ sshd_path }}/moduli -f {{ sshd_path }}/moduli.all
+  when: moduli_file.stat.exists == False
+  tags: sshd secure moduli
+
+- name: Remove moduli.all
+  file: src={{ sshd_path }}/moduli.all state=absent
+  when: moduli_file.stat.exists == False
+  tags: sshd secure moduli
+  
+- name: Check if small moduli exist in moduli file
+  shell: awk '$5 < 2000' {{ sshd_path }}/moduli > "${HOME}/moduli" | wc -l | awk '$1 > 0'
+  register: moduli_small
+  when: moduli_file.stat.exists == True
+  changed_when: moduli_small.stdout
+  tags: sshd secure moduli
+
+- name: Filter out small moduli from moduli file
+  shell: awk '$5 > 2000' {{ sshd_path }}/moduli > "${HOME}/moduli" && mv "${HOME}/moduli" {{ sshd_path }}/moduli
+  when: moduli_file.stat.exists == True and moduli_small.stdout
+  tags: sshd secure moduli

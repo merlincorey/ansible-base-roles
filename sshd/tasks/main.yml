@@ -1,0 +1,26 @@
+---
+# file: roles/sshd/tasks/main.yml
+
+- name: Include OS-specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags: sshd
+
+- include: tasks-FreeBSD.yml
+  when: ansible_os_family == 'FreeBSD'
+  tags: sshd
+
+- include: tasks-Debian.yml
+  when: ansible_os_family == 'Debian'
+  tags: sshd
+
+- include: tasks-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+  tags: sshd
+
+- include: tasks-moduli.yml
+  when: "'diffie-hellman-group-exchange-sha256' in sshd_kex_algorithms"
+  tags: sshd
+
+- include: tasks-host-keys.yml
+  when: sshd_host_keys_secure or not sshd_host_keys_keep
+  tags: sshd
